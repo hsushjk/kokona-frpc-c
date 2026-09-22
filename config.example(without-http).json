@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "title": "Frpc Configuration",
+    "subtitle": "Powered by Example",
+    "footerTip": "Best regards"
+  },
+  "notice": {
+    "params": "<strong>参数</strong><br>服务器地址：cn1.example.com 或 us1.example.com<br>token：YOUR_TOKEN<br>服务器端口：10000<br>可用端口：10001-65535<br>可选协议：tcp/udp",
+    "usage": "<strong>使用说明</strong><br>本 frp 服务只兼容官方 frp 版本，对第三方修改的 frp 不做保证<br>用户可以使用下方的配置生成器快捷生成，将生成的文件放在 frpc 目录后执行 <code>frpc -c frpc.toml</code> 即可启动<br>高级用户可参照已有参数自行配置",
+    "intro": "<strong>配置生成器使用说明</strong><br>在下面的区域中，你可以为 frpc 客户端生成 TOML 配置文件。每个“穿透”代表一个代理规则，可以根据需要添加多个。所有配置更改将自动更新到底部的 TOML 预览区域，方便随时复制或下载。该生成器完全在用户侧浏览器运行，不会上报信息至服务器。"
+  },
+  "server": {
+    "port": 10000,
+    "token": "YOUR_TOKEN",
+    "tcpMux": true,
+    "disablePrintColor": false,
+    "options": [
+      { "value": "cn1.example.com", "label": "中国-深圳 (cn1.example.com)" },
+      { "value": "us1.example.com", "label": "美国-硅谷 (us1.example.com)" }
+    ]
+  },
+  "ports": {
+    "remote": { "min": 10001, "max": 65535 },
+    "local":  { "min": 1024,  "max": 65535 }
+  },
+  "proxyTypes": ["tcp", "udp"],
+  "advanced": {
+    "locations": false,
+    "httpAuth": false,
+    "subdomain": false
+  },
+  "log": {
+    "outputOptions": [
+      { "value": "none",  "label": "不输出日志" },
+      { "value": "local", "label": "输出到本目录 (./frpc.log)" }
+    ],
+    "levelOptions": ["info", "debug", "warn", "error"],
+    "defaultOutput": "local",
+    "defaultLevel": "info",
+    "defaultMaxDays": 30,
+    "maxDaysMin": 1,
+    "maxDaysMax": 365
+  },
+  "defaults": {
+    "proxyCount": 2,
+    "localAddr": "127.0.0.1",
+    "encryption": true,
+    "compression": true,
+    "name": {
+      "chars": "abcdefghijklmnopqrstuvwxyz0123456789",
+      "minLength": 6,
+      "maxLength": 10
+    },
+    "examples": [
+      { "type": "tcp", "remotePort": 30001, "localPort": 8080, "localAddr": "127.0.0.1" },
+      { "type": "udp", "remotePort": null,  "localPort": null, "localAddr": "10.0.0.1" }
+    ]
+  }
+}

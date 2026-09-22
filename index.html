@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <title>Frpc Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 920px;
+        }
+        .header {
+            padding: 16px 0 10px 0;
+            border-bottom: 2px solid #d0d7de;
+            margin-bottom: 12px;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f2328;
+            letter-spacing: -0.3px;
+        }
+        .header p {
+            color: #57606a;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .fatal {
+            background: #ffffff;
+            border: 1px solid #f5c6c2;
+            border-left: 4px solid #b91c1c;
+            padding: 20px 22px;
+            margin-top: 24px;
+            color: #1f2328;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+        .fatal h2 {
+            font-size: 16px;
+            color: #b91c1c;
+            margin-bottom: 8px;
+        }
+        .fatal code {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            padding: 1px 6px;
+            font-size: 12px;
+            font-family: Consolas, Menlo, monospace;
+        }
+
+        .intro {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #1f2328;
+            line-height: 1.5;
+        }
+        .intro strong {
+            color: #0969da;
+        }
+        .custom-info {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            color: #1f2328;
+            line-height: 1.6;
+        }
+        .custom-info a {
+            color: #0969da;
+            text-decoration: underline;
+        }
+        .custom-info a:hover {
+            color: #0550ae;
+        }
+        .custom-info:empty,
+        .intro:empty {
+            display: none;
+        }
+
+        .section {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            padding: 16px 18px;
+            margin-bottom: 18px;
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #57606a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eaeef2;
+            padding-bottom: 6px;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            align-items: center;
+        }
+        .row .field-group {
+            flex: 1 1 150px;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .row .field-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #57606a;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .row .field-group input,
+        .row .field-group select {
+            padding: 6px 10px;
+            border: 1px solid #d0d7de;
+            font-size: 14px;
+            background: #ffffff;
+            outline: none;
+            font-family: inherit;
+            height: 36px;
+            width: 100%;
+        }
+        .row .field-group input:focus,
+        .row .field-group select:focus {
+            border-color: #0969da;
+        }
+        .row .field-group .port-wrap {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .row .field-group .port-wrap input {
+            flex: 1;
+        }
+
+        .dice-btn {
+            background: #eef2f6;
+            border: 1px solid #d0d7de;
+            padding: 0 12px;
+            font-size: 18px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e2a3a;
+            height: 36px;
+            min-width: 38px;
+            border-radius: 4px;
+            transition: 0.1s;
+            line-height: 1;
+        }
+        .dice-btn:hover {
+            background: #e2e8f0;
+            border-color: #b0c0d0;
+        }
+        .dice-btn:active {
+            background: #d0dae6;
+        }
+
+        .proxy-card {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            padding: 14px 18px 12px 18px;
+            margin-bottom: 16px;
+        }
+        .proxy-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eaeef2;
+            padding-bottom: 8px;
+        }
+        .proxy-header .name-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .proxy-header .name-area .name-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2328;
+            white-space: nowrap;
+        }
+        .proxy-header .name-area input {
+            border: 1px solid #d0d7de;
+            padding: 4px 10px;
+            font-size: 14px;
+            background: white;
+            height: 34px;
+            flex: 1 1 160px;
+            min-width: 100px;
+            outline: none;
+        }
+        .proxy-header .name-area input:focus {
+            border-color: #0969da;
+        }
+        .proxy-actions {
+            display: flex;
+            gap: 4px;
+            margin-left: 6px;
+        }
+        .btn-icon {
+            background: transparent;
+            border: 1px solid transparent;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 10px;
+            color: #57606a;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon:hover {
+            background: #f0f2f5;
+            border-color: #d0d7de;
+        }
+        .btn-icon.danger:hover {
+            background: #fee9e7;
+            border-color: #f5c6c2;
+            color: #b91c1c;
+        }
+
+        .proxy-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: flex-end;
+        }
+        .proxy-row + .proxy-row {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eaeef2;
+        }
+        .proxy-row .field-group {
+            flex: 1 1 140px;
+            min-width: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .proxy-row .field-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #57606a;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .proxy-row .field-group .label-hint {
+            font-size: 11px;
+            color: #8b949e;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-left: 4px;
+        }
+        .proxy-row .field-group.type-group {
+            flex: 0 1 90px;
+            min-width: 80px;
+        }
+        .proxy-row .field-group.port-group {
+            flex: 1 1 180px;
+            min-width: 140px;
+        }
+        .proxy-row .field-group.addr-group {
+            flex: 1 1 150px;
+            min-width: 120px;
+        }
+        .proxy-row .field-group.domain-group {
+            flex: 2 1 260px;
+            min-width: 200px;
+        }
+        .proxy-row .field-group.locations-group {
+            flex: 1 1 220px;
+            min-width: 180px;
+        }
+        .proxy-row .field-group.subdomain-group {
+            flex: 1 1 180px;
+            min-width: 140px;
+        }
+        .proxy-row .field-group.auth-group {
+            flex: 1 1 160px;
+            min-width: 130px;
+        }
+        .proxy-row .field-group.opt-group {
+            flex: 1 1 200px;
+            min-width: 160px;
+        }
+        .proxy-row .field-group input,
+        .proxy-row .field-group select {
+            padding: 6px 10px;
+            border: 1px solid #d0d7de;
+            font-size: 14px;
+            background: #ffffff;
+            outline: none;
+            height: 36px;
+            width: 100%;
+            font-family: inherit;
+        }
+        .proxy-row .field-group input:focus,
+        .proxy-row .field-group select:focus {
+            border-color: #0969da;
+        }
+        .proxy-row .field-group .port-wrap {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .proxy-row .field-group .port-wrap input {
+            flex: 1;
+        }
+
+        .inline-check {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 2px;
+            flex-wrap: wrap;
+        }
+        .inline-check label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 400;
+            font-size: 13px;
+            color: #1f2328;
+            cursor: pointer;
+        }
+        .inline-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #0969da;
+            margin: 0;
+        }
+
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 6px 0 12px 0;
+        }
+        .add-proxy-btn {
+            background: #1f883d;
+            border: 1px solid #1a7432;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 0 24px;
+            cursor: pointer;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            border-radius: 0;
+        }
+        .add-proxy-btn:hover {
+            background: #1a7a36;
+        }
+        .add-proxy-btn:active {
+            background: #146c2e;
+        }
+        .reset-btn {
+            background: #eef2f6;
+            border: 1px solid #d0d7de;
+            color: #1f2328;
+            padding: 0 22px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 0;
+            font-family: inherit;
+        }
+        .reset-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .output-wrapper {
+            margin-top: 18px;
+            border: 1px solid #d0d7de;
+            background: #ffffff;
+        }
+        .output-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f6f8fa;
+            border-bottom: 1px solid #d0d7de;
+        }
+        .output-toolbar button {
+            background: #eef2f6;
+            border: 1px solid #d0d7de;
+            color: #1f2328;
+            padding: 4px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            height: 30px;
+            border-radius: 0;
+        }
+        .output-toolbar button:hover {
+            background: #e2e8f0;
+        }
+        .output-content {
+            background: #0d1a2b;
+            color: #e3edf7;
+            padding: 14px 16px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 380px;
+            overflow: auto;
+        }
+        .output-content pre {
+            margin: 0;
+            font-family: inherit;
+            color: inherit;
+        }
+        .footer-tip {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #8b949e;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .proxy-row .field-group {
+                flex: 1 1 120px;
+                min-width: 100px;
+            }
+            .proxy-row .field-group.type-group {
+                flex: 0 1 80px;
+                min-width: 70px;
+            }
+            .proxy-row .field-group.opt-group {
+                flex: 1 1 100%;
+            }
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 12px 10px;
+            }
+            .section {
+                padding: 12px 14px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .header p {
+                font-size: 13px;
+            }
+            .intro {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+            .custom-info {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+            .row .field-group {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+            .proxy-card {
+                padding: 12px 12px 10px 12px;
+            }
+            .proxy-header .name-area input {
+                flex: 1 1 120px;
+                min-width: 80px;
+            }
+            .proxy-row .field-group {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+            .proxy-row .field-group.type-group {
+                flex: 0 1 80px;
+                min-width: 70px;
+            }
+            .action-bar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .add-proxy-btn, .reset-btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+            .output-content {
+                font-size: 12px;
+                padding: 10px 12px;
+                max-height: 300px;
+            }
+            .output-toolbar {
+                padding: 6px 10px;
+            }
+        }
+        @media (max-width: 400px) {
+            body {
+                padding: 8px 6px;
+            }
+            .section {
+                padding: 10px 10px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .intro {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+            .custom-info {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+            .proxy-header .name-area input {
+                font-size: 13px;
+                height: 32px;
+            }
+            .row .field-group input,
+            .row .field-group select,
+            .proxy-row .field-group input,
+            .proxy-row .field-group select {
+                font-size: 13px;
+                height: 32px;
+                padding: 4px 8px;
+            }
+            .dice-btn {
+                height: 32px;
+                min-width: 32px;
+                font-size: 16px;
+                padding: 0 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="appRoot">
+    <div class="header">
+        <h1 id="pageTitle">Frpc Configuration</h1>
+        <p id="pageSubtitle"></p>
+    </div>
+
+    <div class="custom-info" id="noticeParams"></div>
+    <div class="custom-info" id="noticeUsage"></div>
+    <div class="intro" id="introText"></div>
+
+    <div class="section">
+        <div class="section-title">全局设置</div>
+        <div class="row">
+            <div class="field-group">
+                <label>服务器地址</label>
+                <select id="serverSelect"></select>
+            </div>
+            <div class="field-group">
+                <label>日志输出</label>
+                <select id="logOutputSelect"></select>
+            </div>
+            <div class="field-group" id="logLevelGroup">
+                <label>日志等级</label>
+                <select id="logLevelSelect"></select>
+            </div>
+            <div class="field-group" id="logDaysGroup">
+                <label>日志保存天数</label>
+                <input type="number" id="logDaysInput" value="30" min="1" max="365">
+            </div>
+        </div>
+    </div>
+
+    <div id="proxiesContainer"></div>
+
+    <div class="action-bar">
+        <button class="add-proxy-btn" id="addProxyBtn">+ 添加穿透</button>
+        <button class="reset-btn" id="resetBtn">↺ 重置配置</button>
+    </div>
+
+    <div class="output-wrapper">
+        <div class="output-toolbar">
+            <button id="copyBtn">复制</button>
+            <button id="downloadBtn">下载 .toml</button>
+        </div>
+        <div class="output-content" id="outputContent">
+            <pre id="tomlOutput"># 加载中...</pre>
+        </div>
+    </div>
+    <div class="footer-tip" id="footerTip"></div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const DEFAULT_CONFIG = {
+        meta: { title: 'Frpc Configuration', subtitle: '', footerTip: '' },
+        notice: { params: '', usage: '', intro: '' },
+        server: {
+            port: 7000,
+            token: '',
+            tcpMux: true,
+            disablePrintColor: false,
+            options: []
+        },
+        ports: {
+            remote: { min: 1, max: 65535 },
+            local:  { min: 1, max: 65535 }
+        },
+        proxyTypes: ['tcp', 'udp'],
+        advanced: {
+            locations: false,
+            httpAuth: false,
+            subdomain: false
+        },
+        log: {
+            outputOptions: [
+                { value: 'none',  label: '不输出日志' },
+                { value: 'local', label: '输出到本目录 (./frpc.log)' }
+            ],
+            levelOptions: ['info', 'debug', 'warn', 'error'],
+            defaultOutput: 'none',
+            defaultLevel: 'info',
+            defaultMaxDays: 30,
+            maxDaysMin: 1,
+            maxDaysMax: 365
+        },
+        defaults: {
+            proxyCount: 1,
+            localAddr: '127.0.0.1',
+            encryption: true,
+            compression: true,
+            name: { chars: 'abcdefghijklmnopqrstuvwxyz0123456789', minLength: 6, maxLength: 10 },
+            examples: []
+        }
+    };
+
+    const PROXY_TYPE_FIELDS = {
+        tcp:   { remotePort: true,  customDomains: false, locations: false, subdomain: false, httpAuth: false },
+        udp:   { remotePort: true,  customDomains: false, locations: false, subdomain: false, httpAuth: false },
+        http:  { remotePort: false, customDomains: true,  locations: true,  subdomain: true,  httpAuth: true  },
+        https: { remotePort: false, customDomains: true,  locations: true,  subdomain: true,  httpAuth: false }
+    };
+
+    function mergeDeep(base, override) {
+        if (override === undefined || override === null) return base;
+        if (Array.isArray(base) || Array.isArray(override)) return override;
+        if (typeof base !== 'object' || typeof override !== 'object') return override;
+        const out = Object.assign({}, base);
+        for (const key of Object.keys(override)) {
+            if (key in base) out[key] = mergeDeep(base[key], override[key]);
+            else out[key] = override[key];
+        }
+        return out;
+    }
+
+    async function tryFetchJson(url) {
+        try {
+            const res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function loadConfig() {
+        const userCfg = await tryFetchJson('./config.json');
+        if (userCfg) {
+            console.info('[frpc-config] 使用 config.json');
+            return mergeDeep(DEFAULT_CONFIG, userCfg);
+        }
+        const exampleCfg = await tryFetchJson('./config.example.json');
+        if (exampleCfg) {
+            console.info('[frpc-config] 未找到 config.json，使用 config.example.json');
+            return mergeDeep(DEFAULT_CONFIG, exampleCfg);
+        }
+        console.warn('[frpc-config] 未找到任何配置文件');
+        return null;
+    }
+
+    function normalizeOptions(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(t => {
+            if (typeof t === 'string') return { value: t, label: t };
+            if (t && typeof t === 'object' && t.value) return { value: t.value, label: t.label || t.value };
+            return null;
+        }).filter(Boolean);
+    }
+
+    function tomlString(s) {
+        return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    }
+    function tomlBool(b) { return b ? 'true' : 'false'; }
+    function tomlStringArray(arr) {
+        const list = (arr || []).map(s => String(s).trim()).filter(Boolean);
+        return '[' + list.map(tomlString).join(', ') + ']';
+    }
+
+    let CONFIG = DEFAULT_CONFIG;
+    let proxies = [];
+    let nextProxyId = 1;
+
+    let proxiesContainer, outputPre, resetBtn, copyBtn, downloadBtn;
+    let serverSelect, logOutputSelect, logLevelSelect, logDaysInput;
+    let logLevelGroup, logDaysGroup;
+
+    function randomName() {
+        const cfg = CONFIG.defaults.name;
+        const chars = cfg.chars || 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const minL = cfg.minLength || 6;
+        const maxL = cfg.maxLength || 10;
+        const len = minL + Math.floor(Math.random() * (maxL - minL + 1));
+        let result = '';
+        for (let i = 0; i < len; i++) result += chars[Math.floor(Math.random() * chars.length)];
+        return result;
+    }
+    function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function randomRemotePort() { return randomInt(CONFIG.ports.remote.min, CONFIG.ports.remote.max); }
+    function randomLocalPort()  { return randomInt(CONFIG.ports.local.min,  CONFIG.ports.local.max); }
+
+    function showFatalError(msg) {
+        document.getElementById('appRoot').innerHTML =
+            '<div class="header"><h1>Frpc Configuration</h1></div>' +
+            '<div class="fatal">' +
+                '<h2>无法启动配置生成器</h2>' +
+                '<p>' + msg + '</p>' +
+                '<p style="margin-top:10px">请在同一目录下放置 <code>config.json</code>（私有）或 <code>config.example.json</code>（示例）。可参考项目仓库中的示例文件。</p>' +
+            '</div>';
+    }
+
+    function applyConfig() {
+        document.title = CONFIG.meta.title || 'Frpc Configuration';
+        document.getElementById('pageTitle').textContent = CONFIG.meta.title || 'Frpc Configuration';
+        document.getElementById('pageSubtitle').textContent = CONFIG.meta.subtitle || '';
+        document.getElementById('footerTip').textContent = CONFIG.meta.footerTip || '';
+
+        document.getElementById('noticeParams').innerHTML = CONFIG.notice.params || '';
+        document.getElementById('noticeUsage').innerHTML  = CONFIG.notice.usage  || '';
+        document.getElementById('introText').innerHTML    = CONFIG.notice.intro  || '';
+
+        serverSelect.innerHTML = '';
+        const serverOpts = normalizeOptions(CONFIG.server.options);
+        if (serverOpts.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '（未配置服务器地址）';
+            serverSelect.appendChild(opt);
+        } else {
+            serverOpts.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.value;
+                opt.textContent = o.label;
+                serverSelect.appendChild(opt);
+            });
+        }
+
+        logOutputSelect.innerHTML = '';
+        normalizeOptions(CONFIG.log.outputOptions).forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.value;
+            opt.textContent = o.label;
+            if (o.value === CONFIG.log.defaultOutput) opt.selected = true;
+            logOutputSelect.appendChild(opt);
+        });
+
+        logLevelSelect.innerHTML = '';
+        (CONFIG.log.levelOptions || []).forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            if (v === CONFIG.log.defaultLevel) opt.selected = true;
+            logLevelSelect.appendChild(opt);
+        });
+
+        logDaysInput.value = CONFIG.log.defaultMaxDays;
+        logDaysInput.min = CONFIG.log.maxDaysMin;
+        logDaysInput.max = CONFIG.log.maxDaysMax;
+
+        updateLogFieldsVisibility();
+    }
+
+    function updateLogFieldsVisibility() {
+        const isNone = logOutputSelect.value === 'none';
+        logLevelGroup.style.display = isNone ? 'none' : '';
+        logDaysGroup.style.display  = isNone ? 'none' : '';
+    }
+
+    function getProxyTypes() {
+        const list = normalizeOptions(CONFIG.proxyTypes);
+        const filtered = list.filter(t => PROXY_TYPE_FIELDS[t.value]);
+        return filtered.length ? filtered : normalizeOptions(['tcp', 'udp']);
+    }
+
+    function createDefaultProxy() {
+        const types = getProxyTypes();
+        const firstType = types[0] ? types[0].value : 'tcp';
+        return {
+            id: nextProxyId++,
+            name: randomName(),
+            type: firstType,
+            remotePort: randomRemotePort(),
+            customDomains: [],
+            locations: [],
+            subdomain: '',
+            httpUser: '',
+            httpPwd: '',
+            localPort: randomLocalPort(),
+            localAddr: CONFIG.defaults.localAddr,
+            encryption: !!CONFIG.defaults.encryption,
+            compression: !!CONFIG.defaults.compression
+        };
+    }
+
+    function makeFieldGroup(labelText, hintText) {
+        const g = document.createElement('div');
+        g.className = 'field-group';
+        const l = document.createElement('label');
+        l.textContent = labelText;
+        if (hintText) {
+            const h = document.createElement('span');
+            h.className = 'label-hint';
+            h.textContent = hintText;
+            l.appendChild(h);
+        }
+        g.appendChild(l);
+        return g;
+    }
+
+    function renderProxies() {
+        proxiesContainer.innerHTML = '';
+        const types = getProxyTypes();
+        const ADV = CONFIG.advanced || {};
+
+        proxies.forEach(proxy => {
+            const fields = PROXY_TYPE_FIELDS[proxy.type] || PROXY_TYPE_FIELDS.tcp;
+
+            const card = document.createElement('div');
+            card.className = 'proxy-card';
+            card.dataset.proxyId = proxy.id;
+
+            const header = document.createElement('div');
+            header.className = 'proxy-header';
+
+            const nameArea = document.createElement('div');
+            nameArea.className = 'name-area';
+
+            const nameLabel = document.createElement('span');
+            nameLabel.className = 'name-label';
+            nameLabel.textContent = '穿透名称';
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = proxy.name;
+            nameInput.placeholder = '自定义名称';
+            nameInput.className = 'proxy-name-input';
+            nameInput.addEventListener('input', e => {
+                proxy.name = e.target.value;
+                updateOutput();
+            });
+
+            const diceName = document.createElement('button');
+            diceName.type = 'button';
+            diceName.className = 'dice-btn';
+            diceName.textContent = '🎲';
+            diceName.title = '随机名称';
+            diceName.addEventListener('click', e => {
+                e.stopPropagation();
+                const newName = randomName();
+                nameInput.value = newName;
+                proxy.name = newName;
+                updateOutput();
+            });
+
+            nameArea.appendChild(nameLabel);
+            nameArea.appendChild(nameInput);
+            nameArea.appendChild(diceName);
+
+            const actions = document.createElement('div');
+            actions.className = 'proxy-actions';
+
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'btn-icon danger';
+            delBtn.textContent = '✕';
+            delBtn.title = '删除';
+            delBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                if (proxies.length <= 1) { alert('至少保留一个穿透'); return; }
+                proxies = proxies.filter(p => p.id !== proxy.id);
+                renderProxies();
+                updateOutput();
+            });
+
+            actions.appendChild(delBtn);
+            header.appendChild(nameArea);
+            header.appendChild(actions);
+            card.appendChild(header);
+
+            const row1 = document.createElement('div');
+            row1.className = 'proxy-row';
+
+            const typeGroup = makeFieldGroup('类型');
+            typeGroup.classList.add('type-group');
+            const typeSelect = document.createElement('select');
+            typeSelect.className = 'proxy-type';
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.value;
+                opt.textContent = t.label;
+                if (t.value === proxy.type) opt.selected = true;
+                typeSelect.appendChild(opt);
+            });
+            typeSelect.addEventListener('change', e => {
+                proxy.type = e.target.value;
+                const f = PROXY_TYPE_FIELDS[proxy.type] || PROXY_TYPE_FIELDS.tcp;
+                if (f.customDomains && !Array.isArray(proxy.customDomains)) proxy.customDomains = [];
+                if (f.remotePort && !proxy.remotePort) proxy.remotePort = randomRemotePort();
+                renderProxies();
+                updateOutput();
+            });
+            typeGroup.appendChild(typeSelect);
+            row1.appendChild(typeGroup);
+
+            if (fields.remotePort) {
+                const remoteGroup = makeFieldGroup('远程端口');
+                remoteGroup.classList.add('port-group');
+                const remoteWrap = document.createElement('div');
+                remoteWrap.className = 'port-wrap';
+                const remoteInput = document.createElement('input');
+                remoteInput.type = 'number';
+                remoteInput.className = 'proxy-remote-port';
+                remoteInput.value = proxy.remotePort;
+                remoteInput.min = CONFIG.ports.remote.min;
+                remoteInput.max = CONFIG.ports.remote.max;
+                remoteInput.addEventListener('input', e => {
+                    let val = parseInt(e.target.value, 10);
+                    if (isNaN(val) || val < CONFIG.ports.remote.min) val = CONFIG.ports.remote.min;
+                    if (val > CONFIG.ports.remote.max) val = CONFIG.ports.remote.max;
+                    proxy.remotePort = val;
+                    e.target.value = val;
+                    updateOutput();
+                });
+                const diceRemote = document.createElement('button');
+                diceRemote.type = 'button';
+                diceRemote.className = 'dice-btn';
+                diceRemote.textContent = '🎲';
+                diceRemote.title = '随机';
+                diceRemote.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const val = randomRemotePort();
+                    remoteInput.value = val;
+                    proxy.remotePort = val;
+                    updateOutput();
+                });
+                remoteWrap.appendChild(remoteInput);
+                remoteWrap.appendChild(diceRemote);
+                remoteGroup.appendChild(remoteWrap);
+                row1.appendChild(remoteGroup);
+            }
+
+            if (fields.customDomains) {
+                const domainGroup = makeFieldGroup('绑定域名', '（逗号分隔，可多个）');
+                domainGroup.classList.add('domain-group');
+                const domainInput = document.createElement('input');
+                domainInput.type = 'text';
+                domainInput.className = 'proxy-custom-domains';
+                domainInput.value = (proxy.customDomains || []).join(', ');
+                domainInput.placeholder = 'example.com, www.example.com';
+                domainInput.addEventListener('input', e => {
+                    proxy.customDomains = e.target.value
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(Boolean);
+                    updateOutput();
+                });
+                domainGroup.appendChild(domainInput);
+                row1.appendChild(domainGroup);
+            }
+
+            const addrGroup = makeFieldGroup('本地地址');
+            addrGroup.classList.add('addr-group');
+            const addrInput = document.createElement('input');
+            addrInput.type = 'text';
+            addrInput.className = 'proxy-local-addr';
+            addrInput.value = proxy.localAddr;
+            addrInput.placeholder = CONFIG.defaults.localAddr;
+            addrInput.addEventListener('input', e => {
+                proxy.localAddr = e.target.value || CONFIG.defaults.localAddr;
+                updateOutput();
+            });
+            addrGroup.appendChild(addrInput);
+            row1.appendChild(addrGroup);
+
+            const localGroup = makeFieldGroup('本地端口');
+            localGroup.classList.add('port-group');
+            const localInput = document.createElement('input');
+            localInput.type = 'number';
+            localInput.className = 'proxy-local-port';
+            localInput.value = proxy.localPort;
+            localInput.min = CONFIG.ports.local.min;
+            localInput.max = CONFIG.ports.local.max;
+            localInput.addEventListener('input', e => {
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val) || val < CONFIG.ports.local.min) val = CONFIG.ports.local.min;
+                if (val > CONFIG.ports.local.max) val = CONFIG.ports.local.max;
+                proxy.localPort = val;
+                e.target.value = val;
+                updateOutput();
+            });
+            localGroup.appendChild(localInput);
+            row1.appendChild(localGroup);
+
+            const optGroup = makeFieldGroup('附加选项');
+            optGroup.classList.add('opt-group');
+            const optInner = document.createElement('div');
+            optInner.className = 'inline-check';
+
+            const encLabel = document.createElement('label');
+            const encCheck = document.createElement('input');
+            encCheck.type = 'checkbox';
+            encCheck.checked = proxy.encryption;
+            encCheck.addEventListener('change', e => {
+                proxy.encryption = e.target.checked;
+                updateOutput();
+            });
+            encLabel.appendChild(encCheck);
+            encLabel.appendChild(document.createTextNode('传输加密[推荐]'));
+
+            const compLabel = document.createElement('label');
+            const compCheck = document.createElement('input');
+            compCheck.type = 'checkbox';
+            compCheck.checked = proxy.compression;
+            compCheck.addEventListener('change', e => {
+                proxy.compression = e.target.checked;
+                updateOutput();
+            });
+            compLabel.appendChild(compCheck);
+            compLabel.appendChild(document.createTextNode('传输压缩[推荐]'));
+
+            optInner.appendChild(encLabel);
+            optInner.appendChild(compLabel);
+            optGroup.appendChild(optInner);
+            row1.appendChild(optGroup);
+
+            card.appendChild(row1);
+
+            const needAdvancedRow =
+                fields.customDomains &&
+                ((ADV.locations && fields.locations) ||
+                 (ADV.subdomain && fields.subdomain) ||
+                 (ADV.httpAuth && fields.httpAuth && proxy.type === 'http'));
+
+            if (needAdvancedRow) {
+                const row2 = document.createElement('div');
+                row2.className = 'proxy-row';
+
+                if (ADV.locations && fields.locations) {
+                    const locGroup = makeFieldGroup('URL 路由', '（逗号分隔，可空）');
+                    locGroup.classList.add('locations-group');
+                    const locInput = document.createElement('input');
+                    locInput.type = 'text';
+                    locInput.className = 'proxy-locations';
+                    locInput.value = (proxy.locations || []).join(', ');
+                    locInput.placeholder = '/, /api, /static';
+                    locInput.addEventListener('input', e => {
+                        proxy.locations = e.target.value
+                            .split(',')
+                            .map(s => s.trim())
+                            .filter(Boolean);
+                        updateOutput();
+                    });
+                    locGroup.appendChild(locInput);
+                    row2.appendChild(locGroup);
+                }
+
+                if (ADV.subdomain && fields.subdomain) {
+                    const subGroup = makeFieldGroup('子域名', '（需 frps 配置 subdomainHost）');
+                    subGroup.classList.add('subdomain-group');
+                    const subInput = document.createElement('input');
+                    subInput.type = 'text';
+                    subInput.className = 'proxy-subdomain';
+                    subInput.value = proxy.subdomain || '';
+                    subInput.placeholder = 'myservice';
+                    subInput.addEventListener('input', e => {
+                        proxy.subdomain = e.target.value.trim();
+                        updateOutput();
+                    });
+                    subGroup.appendChild(subInput);
+                    row2.appendChild(subGroup);
+                }
+
+                if (ADV.httpAuth && fields.httpAuth && proxy.type === 'http') {
+                    const userGroup = makeFieldGroup('HTTP 用户名');
+                    userGroup.classList.add('auth-group');
+                    const userInput = document.createElement('input');
+                    userInput.type = 'text';
+                    userInput.className = 'proxy-http-user';
+                    userInput.value = proxy.httpUser || '';
+                    userInput.placeholder = '可空';
+                    userInput.addEventListener('input', e => {
+                        proxy.httpUser = e.target.value;
+                        updateOutput();
+                    });
+                    userGroup.appendChild(userInput);
+                    row2.appendChild(userGroup);
+
+                    const pwdGroup = makeFieldGroup('HTTP 密码');
+                    pwdGroup.classList.add('auth-group');
+                    const pwdInput = document.createElement('input');
+                    pwdInput.type = 'text';
+                    pwdInput.className = 'proxy-http-pwd';
+                    pwdInput.value = proxy.httpPwd || '';
+                    pwdInput.placeholder = '可空';
+                    pwdInput.addEventListener('input', e => {
+                        proxy.httpPwd = e.target.value;
+                        updateOutput();
+                    });
+                    pwdGroup.appendChild(pwdInput);
+                    row2.appendChild(pwdGroup);
+                }
+
+                card.appendChild(row2);
+            }
+
+            proxiesContainer.appendChild(card);
+        });
+    }
+
+    function resetExample() {
+        proxies = [];
+        nextProxyId = 1;
+
+        const count = Math.max(1, CONFIG.defaults.proxyCount || 1);
+        const examples = CONFIG.defaults.examples || [];
+
+        for (let i = 0; i < count; i++) {
+            const p = createDefaultProxy();
+            const ex = examples[i] || {};
+
+            if (ex.type && PROXY_TYPE_FIELDS[ex.type]) p.type = ex.type;
+            const fields = PROXY_TYPE_FIELDS[p.type] || PROXY_TYPE_FIELDS.tcp;
+
+            if (fields.remotePort) {
+                p.remotePort = (ex.remotePort != null) ? ex.remotePort : randomRemotePort();
+            }
+            if (fields.customDomains) {
+                if (Array.isArray(ex.customDomains)) p.customDomains = ex.customDomains.slice();
+                else if (typeof ex.customDomains === 'string')
+                    p.customDomains = ex.customDomains.split(',').map(s => s.trim()).filter(Boolean);
+                else p.customDomains = [];
+            }
+            if (fields.locations && ex.locations) {
+                p.locations = Array.isArray(ex.locations)
+                    ? ex.locations.slice()
+                    : String(ex.locations).split(',').map(s => s.trim()).filter(Boolean);
+            }
+            if (fields.subdomain && ex.subdomain) p.subdomain = String(ex.subdomain);
+            if (fields.httpAuth && ex.httpUser) p.httpUser = String(ex.httpUser);
+            if (fields.httpAuth && ex.httpPwd)  p.httpPwd  = String(ex.httpPwd);
+
+            p.localPort = (ex.localPort != null) ? ex.localPort : randomLocalPort();
+            if (ex.localAddr) p.localAddr = ex.localAddr;
+
+            proxies.push(p);
+        }
+
+        renderProxies();
+        updateOutput();
+    }
+
+    function generateToml() {
+        const server = serverSelect.value || '';
+        const logOutput = logOutputSelect.value;
+        const logLevel = logLevelSelect.value;
+        const logDays = parseInt(logDaysInput.value, 10) || CONFIG.log.defaultMaxDays;
+
+        const lines = [];
+        lines.push('# frpc config generated by frpc-config-generator');
+        lines.push(`serverAddr = ${tomlString(server)}`);
+        lines.push(`serverPort = ${CONFIG.server.port}`);
+        lines.push(`auth.method = "token"`);
+        lines.push(`auth.token = ${tomlString(CONFIG.server.token)}`);
+        lines.push(`transport.tcpMux = ${tomlBool(CONFIG.server.tcpMux)}`);
+
+        if (logOutput !== 'none') {
+            if (logOutput === 'local') {
+                lines.push(`log.to = "./frpc.log"`);
+            } else {
+                lines.push(`log.to = ${tomlString(logOutput)}`);
+            }
+            lines.push(`log.level = ${tomlString(logLevel)}`);
+            lines.push(`log.maxDays = ${logDays}`);
+            lines.push(`log.disablePrintColor = ${tomlBool(CONFIG.server.disablePrintColor)}`);
+        }
+
+        lines.push('');
+
+        proxies.forEach(proxy => {
+            const fields = PROXY_TYPE_FIELDS[proxy.type] || PROXY_TYPE_FIELDS.tcp;
+            const name = (proxy.name || '').trim() || `proxy_${proxy.id}`;
+
+            lines.push('[[proxies]]');
+            lines.push(`name = ${tomlString(name)}`);
+            lines.push(`type = ${tomlString(proxy.type)}`);
+            lines.push(`localIP = ${tomlString(proxy.localAddr || CONFIG.defaults.localAddr)}`);
+            lines.push(`localPort = ${proxy.localPort}`);
+
+            if (fields.remotePort) {
+                lines.push(`remotePort = ${proxy.remotePort}`);
+            }
+            if (fields.customDomains) {
+                lines.push(`customDomains = ${tomlStringArray(proxy.customDomains)}`);
+            }
+            if (fields.locations && Array.isArray(proxy.locations) && proxy.locations.length) {
+                lines.push(`locations = ${tomlStringArray(proxy.locations)}`);
+            }
+            if (fields.subdomain && proxy.subdomain) {
+                lines.push(`subdomain = ${tomlString(proxy.subdomain)}`);
+            }
+            if (fields.httpAuth && proxy.type === 'http') {
+                if (proxy.httpUser) lines.push(`http_user = ${tomlString(proxy.httpUser)}`);
+                if (proxy.httpPwd)  lines.push(`http_pwd = ${tomlString(proxy.httpPwd)}`);
+            }
+
+            if (proxy.encryption || proxy.compression) {
+                lines.push('[proxies.transport]');
+                if (proxy.encryption) lines.push('useEncryption = true');
+                if (proxy.compression) lines.push('useCompression = true');
+            }
+            lines.push('');
+        });
+
+        return lines.join('\n');
+    }
+
+    function updateOutput() {
+        outputPre.textContent = generateToml();
+    }
+
+    function bindEvents() {
+        document.getElementById('addProxyBtn').addEventListener('click', () => {
+            proxies.push(createDefaultProxy());
+            renderProxies();
+            updateOutput();
+        });
+
+        resetBtn.addEventListener('click', resetExample);
+
+        copyBtn.addEventListener('click', () => {
+            const text = outputPre.textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    copyBtn.textContent = '已复制';
+                    setTimeout(() => { copyBtn.textContent = '复制'; }, 1500);
+                }).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const text = outputPre.textContent;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'frpc.toml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        serverSelect.addEventListener('change', updateOutput);
+
+        logOutputSelect.addEventListener('change', () => {
+            updateLogFieldsVisibility();
+            updateOutput();
+        });
+        logLevelSelect.addEventListener('change', updateOutput);
+        logDaysInput.addEventListener('input', updateOutput);
+        logDaysInput.addEventListener('change', updateOutput);
+    }
+
+    function fallbackCopy(text) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            copyBtn.textContent = '已复制';
+            setTimeout(() => { copyBtn.textContent = '复制'; }, 1500);
+        } catch (_) {
+            alert('复制失败，请手动选择复制');
+        }
+    }
+
+    async function init() {
+        proxiesContainer = document.getElementById('proxiesContainer');
+        outputPre        = document.getElementById('tomlOutput');
+        resetBtn         = document.getElementById('resetBtn');
+        copyBtn          = document.getElementById('copyBtn');
+        downloadBtn      = document.getElementById('downloadBtn');
+        serverSelect     = document.getElementById('serverSelect');
+        logOutputSelect  = document.getElementById('logOutputSelect');
+        logLevelSelect   = document.getElementById('logLevelSelect');
+        logDaysInput     = document.getElementById('logDaysInput');
+        logLevelGroup    = document.getElementById('logLevelGroup');
+        logDaysGroup     = document.getElementById('logDaysGroup');
+
+        const loaded = await loadConfig();
+        if (!loaded) {
+            showFatalError('未找到 <code>config.json</code> 或 <code>config.example.json</code>。');
+            return;
+        }
+        CONFIG = loaded;
+
+        applyConfig();
+        resetExample();
+        bindEvents();
+    }
+
+    init().catch(err => {
+        console.error(err);
+        showFatalError('初始化失败：' + (err && err.message ? err.message : String(err)));
+    });
+})();
+</script>
+</body>
+</html>

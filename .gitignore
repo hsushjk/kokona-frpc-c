@@ -1,0 +1,7 @@
+config.json
+frpc.log
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
